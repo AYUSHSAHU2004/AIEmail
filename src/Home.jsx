@@ -5,6 +5,7 @@ import { Navigate, useNavigate } from 'react-router-dom';
 import { auth } from './firebase/firebase';
 import { motion } from 'framer-motion';
 
+
 const Home = () => {
     const [emailData, setEmailData] = useState({
         from: '',
@@ -122,9 +123,10 @@ const Home = () => {
     },[emailData.emailUser])
     
     const handleGenerateEmail = async () => {
+        console.log(process.env.REACT_APP_GEMINI_API_KEY);
         try {
             const response = await axios.post(
-                'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=AIzaSyAX_0vks_66YdqcXiyjLO7qWTh2uMG6sb8',
+                `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${process.env.REACT_APP_GEMINI_API_KEY}`,
                 {
                     contents: [
                         {
