@@ -1,131 +1,72 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'; // Use Navigate for redirection
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from './firebase/firebase';
+import Home from './Home';
+import NewGroup from './Pages/NewGroup/NewGroup';
 import axios from 'axios';
+import Login from './Pages/Login/Login';
+import SignUp from './Pages/SignUp/SignUp';
 
 const App = () => {
-    const [emailData, setEmailData] = useState({
-        from: '',
-        subject: '',
-        text: '',
-        emailUser: '',
-        emailPass: ''
-    });
+  const [user, setUser] = useState(null);
+  const [isEmailValid, setIsEmailValid] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-    const [recipients, setRecipients] = useState([]);
-    const [numEmails, setNumEmails] = useState(1);
 
-    const handleChange = (e) => {
-        setEmailData({ ...emailData, [e.target.name]: e.target.value });
-    };
-
-    const handleRecipientChange = (index, value) => {
-        const updatedRecipients = [...recipients];
-        updatedRecipients[index] = value;
-        setRecipients(updatedRecipients);
-    };
-
-    const handleSendAll = async () => {
+  useEffect(() => {
+    // Listen for changes in the authentication state
+    const unsubscribe = onAuthStateChanged(auth, async(user) => {
+      if (user) {
+        setUser(user); // If the user is logged in, set the user state
         try {
-            const promises = recipients.map((recipient) => {
-                return axios.post('http://localhost:3020/api/email', {
-                    ...emailData,
-                    to: recipient
-                });
-            });
-            const results = await Promise.all(promises);
-            alert("Email sent succesfully");
-            console.log('Emails sent successfully:', results);
-            // Handle success (e.g., update UI to indicate success)
-            // localStorage.setItem("arrEmails",JSON.stringify(recipients));
-            // alert(recipients);
-
+          setLoading(true);
+          const response = await axios.get(
+            `http://localhost:3020/checkUser/${user.email}`
+          );
+          if (response.status === 200) {
+            setIsEmailValid(true); // Email exists in the database
+          } else {
+            setIsEmailValid(false);
+          }
         } catch (error) {
-            console.error('Failed to send emails:', error);
-            // Handle error (e.g., update UI to indicate failure)
+          console.error('Error validating email:', error);
+          setIsEmailValid(false); // Email not valid
+        } finally {
+          setLoading(false); // Stop loading
         }
-    };
+      } else {
+        setUser(null); // If not, set user state to null
+      }
+    });
+    
 
-    const handleNumEmailsChange = (e) => {
-        const num = parseInt(e.target.value);
-        setNumEmails(num);
-        if(num>0){
-          setRecipients(Array(num).fill(''));
-        }
-        // Initialize recipients array with empty strings
-    };
+    // Cleanup the listener when the component unmounts
+    return () => unsubscribe();
+  }, []);
 
-    return (
-        <div style={{ fontFamily: 'Arial, sans-serif', maxWidth: '600px', margin: '0 auto', padding: '20px' }}>
-            <h1 style={{ textAlign: 'center', marginBottom: '20px' }}>Email Form</h1>
-            <label style={{ display: 'block', marginBottom: '10px' }}>Number of Emails to Send:</label>
-            <input
-                type="number"
-                value={numEmails}
-                onChange={handleNumEmailsChange}
-                min="1"
-                style={{ marginBottom: '20px', padding: '8px', width: '100%', boxSizing: 'border-box' }}
-            />
-            <form onSubmit={(e) => e.preventDefault()} style={{ marginBottom: '20px' }}>
-                <input
-                    type="email"
-                    name="from"
-                    placeholder="From"
-                    value={emailData.from}
-                    onChange={handleChange}
-                    required
-                    style={{ marginBottom: '10px', padding: '8px', width: '100%', boxSizing: 'border-box' }}
-                />
-                <input
-                    type="text"
-                    name="subject"
-                    placeholder="Subject"
-                    value={emailData.subject}
-                    onChange={handleChange}
-                    required
-                    style={{ marginBottom: '10px', padding: '8px', width: '100%', boxSizing: 'border-box' }}
-                />
-                <textarea
-                    name="text"
-                    placeholder="Message"
-                    value={emailData.text}
-                    onChange={handleChange}
-                    required
-                    style={{ marginBottom: '10px', padding: '8px', width: '100%', minHeight: '100px', boxSizing: 'border-box' }}
-                />
-                <input
-                    type="email"
-                    name="emailUser"
-                    placeholder="Your Email"
-                    value={emailData.emailUser}
-                    onChange={handleChange}
-                    required
-                    style={{ marginBottom: '10px', padding: '8px', width: '100%', boxSizing: 'border-box' }}
-                />
-                <input
-                    type="password"
-                    name="emailPass"
-                    placeholder="Your Password"
-                    value={emailData.emailPass}
-                    onChange={handleChange}
-                    required
-                    style={{ marginBottom: '10px', padding: '8px', width: '100%', boxSizing: 'border-box' }}
-                />
-                <div>
-                    {recipients.map((recipient, index) => (
-                        <input
-                            key={index}
-                            type="email"
-                            placeholder={`Recipient ${index + 1}`}
-                            value={recipient}
-                            onChange={(e) => handleRecipientChange(index, e.target.value)}
-                            required
-                            style={{ marginBottom: '10px', padding: '8px', width: '100%', boxSizing: 'border-box' }}
-                        />
-                    ))}
-                </div>
-                <button type="button" onClick={handleSendAll} style={{ padding: '10px 20px', backgroundColor: '#007bff', color: '#fff', border: 'none', cursor: 'pointer' }}>Send Emails</button>
-            </form>
-        </div>
-    );
+  return (
+    <Router>
+      <Routes>
+        <Route
+          path="/"
+          element={user ? <Home /> : <Navigate to="/login" />} // Redirect to /login if no user
+        />
+        <Route
+          path="/login"
+          element={(user && isEmailValid )? <Navigate to="/" /> : <Login />} // Redirect to / if user is logged in
+        />
+        <Route
+          path="/SignUp"
+          element=<SignUp/>
+        />
+        <Route
+          path="/NewGroup"
+          element=<NewGroup/>
+        />
+      </Routes>
+    </Router>
+  );
 };
 
 export default App;
