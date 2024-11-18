@@ -11,7 +11,6 @@ import SignUp from './Pages/SignUp/SignUp';
 const App = () => {
   const [user, setUser] = useState(null);
   const [isEmailValid, setIsEmailValid] = useState(false);
-  const [loading, setLoading] = useState(true);
 
 
   useEffect(() => {
@@ -20,7 +19,6 @@ const App = () => {
       if (user) {
         setUser(user); // If the user is logged in, set the user state
         try {
-          setLoading(true);
           const response = await axios.get(
             `http://localhost:3020/checkUser/${user.email}`
           );
@@ -32,9 +30,7 @@ const App = () => {
         } catch (error) {
           console.error('Error validating email:', error);
           setIsEmailValid(false); // Email not valid
-        } finally {
-          setLoading(false); // Stop loading
-        }
+        } 
       } else {
         setUser(null); // If not, set user state to null
       }

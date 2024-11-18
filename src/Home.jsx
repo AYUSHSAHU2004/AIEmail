@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useEffect } from 'react';
 import axios from 'axios';
-import { Navigate, useNavigate } from 'react-router-dom';
+import {useNavigate } from 'react-router-dom';
 import { auth } from './firebase/firebase';
 import { motion } from 'framer-motion';
 
@@ -18,14 +18,12 @@ const Home = () => {
 
     const [recipients, setRecipients] = useState([]);
     const [numEmails, setNumEmails] = useState(1);
-    const [isSuccess, setIsSuccess] = useState(false);
     const [isGroup,setIsGroup] = useState(false);
     const [groups,setGroups] = useState([]);
     const [isAIEnabled, setIsAIEnabled] = useState(false); // Toggle for AI-generated email
     const [aiPrompt, setAiPrompt] = useState(''); // Prompt for AI
     const [language, setLanguage] = useState('en'); // Language of email
     const [wordCount, setWordCount] = useState(100); // Number of words for AI email
-    const [selectedEmailList, setSelectedEmailList] = useState([]);
 
     
     useEffect(() => {
@@ -90,7 +88,6 @@ const Home = () => {
             await Promise.all(promises); // Wait for all emails to be sent
             
             alert('Emails sent successfully'); // Notify user of success
-            setIsSuccess(true); // Update the success state
         } catch (error) {
             console.error('Failed to send emails:', error);
             alert('Failed to send some or all emails'); // Notify user of failure
