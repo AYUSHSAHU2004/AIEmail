@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Navigate, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 const UpdateGroup = () => {
   const { groupName } = useParams(); // Fetching the groupName from the URL parameter
   const [groupDetails, setGroupDetails] = useState(null);
   const [userEmail, setUserEmail] = useState(null); // State to store user email
-  const [emailList, setEmailList] = useState([]); // Original email list
   const [updatedEmailList, setUpdatedEmailList] = useState([]); // Updated email list
   const [newGroupName, setNewGroupName] = useState(groupName); // New group name state
   const [newEmail, setNewEmail] = useState(''); // State for new email input
@@ -28,7 +27,6 @@ const UpdateGroup = () => {
         }
         const data = await response.json();
         setGroupDetails(data); // Store the group details
-        setEmailList(data.data.emailList || []); // Set the email list
         setUpdatedEmailList(data.data.emailList || []); // Initialize updatedEmailList
       } catch (error) {
         alert('Error fetching group details');
