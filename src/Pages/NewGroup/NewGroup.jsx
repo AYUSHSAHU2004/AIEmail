@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const NewGroup = () => {
   const [groupName, setGroupName] = useState("");
   const [email, setEmail] = useState("");
   const [groups, setGroups] = useState([]);
   const [emailList, setEmailList] = useState([]);
+  const navigate = useNavigate(); // Hook for navigation
 
   // Load emails from localStorage on component mount
   useEffect(() => {
@@ -29,7 +31,6 @@ const NewGroup = () => {
         }
         const storedGroups = await response.json();
         if (storedGroups) {
-          console.log(storedGroups.data);
           setGroups(storedGroups.data);
         }
       } catch (err) {
@@ -40,7 +41,6 @@ const NewGroup = () => {
     fetchGroups();
   }, []);
 
-  // Function to add email to localStorage
   const handleAddEmail = () => {
     if (!email) {
       alert("Please enter a valid email");
@@ -55,7 +55,6 @@ const NewGroup = () => {
     setEmail(""); // Clear email input after adding
   };
 
-  // Function to delete email from localStorage
   const handleDeleteEmail = (emailToDelete) => {
     const updatedEmails = emailList.filter((item) => item !== emailToDelete);
     setEmailList(updatedEmails);
@@ -64,7 +63,6 @@ const NewGroup = () => {
     alert(`${emailToDelete} removed from the group.`);
   };
 
-  // Function to confirm group creation
   const handleConfirmGroup = async () => {
     const userEmail = localStorage.getItem("user");
     if (!groupName) {
@@ -100,8 +98,7 @@ const NewGroup = () => {
         setGroupName(""); // Clear group name input
         setEmailList([]); // Clear email list
         localStorage.removeItem("arr"); // Clear localStorage for emails
-        const updatedGroups = await response.json();
-        setGroups(updatedGroups); // Update groups after successful creation
+        window.location.reload(); // Reload the page after group creation
       } else {
         const errorData = await response.json();
         alert(errorData.error);
@@ -111,7 +108,6 @@ const NewGroup = () => {
     }
   };
 
-  // Function to delete a group
   const handleDeleteGroup = async (groupToDelete) => {
     const userEmail = localStorage.getItem("user");
     if (!userEmail) {
@@ -137,84 +133,51 @@ const NewGroup = () => {
     }
   };
 
-  return (
-    <div style={{ padding: "20px", fontFamily: "Arial, sans-serif" }}>
-      <h2>Create New Group</h2>
+  const handleUpdateGroup = (groupName) => {
+    navigate(`/UpdateGroup/${groupName}`);
+  };
 
-      <div style={{ marginBottom: "20px" }}>
-        <label style={{ marginRight: "10px" }}>Group Name:</label>
+  return (
+    <div style={styles.container}>
+      <h2 style={styles.heading}>Create New Group</h2>
+      <button style={styles.buttonPrimary} onClick={() => navigate("/")}>
+        Home Page
+      </button>
+
+      <div style={styles.inputGroup}>
+        <label style={styles.label}>Group Name:</label>
         <input
           type="text"
           value={groupName}
           onChange={(e) => setGroupName(e.target.value)}
           placeholder="Enter group name"
-          style={{
-            padding: "5px",
-            border: "1px solid #ccc",
-            borderRadius: "5px",
-            width: "200px",
-          }}
+          style={styles.input}
         />
       </div>
 
-      <div style={{ marginBottom: "20px" }}>
-        <label style={{ marginRight: "10px" }}>Email:</label>
+      <div style={styles.inputGroup}>
+        <label style={styles.label}>Email:</label>
         <input
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="Enter email to add"
-          style={{
-            padding: "5px",
-            border: "1px solid #ccc",
-            borderRadius: "5px",
-            width: "200px",
-          }}
+          style={styles.input}
         />
-        <button
-          onClick={handleAddEmail}
-          style={{
-            marginLeft: "10px",
-            padding: "5px 10px",
-            border: "none",
-            backgroundColor: "#007BFF",
-            color: "#fff",
-            borderRadius: "5px",
-            cursor: "pointer",
-          }}
-        >
+        <button style={styles.buttonSecondary} onClick={handleAddEmail}>
           Add Email
         </button>
       </div>
 
-      <h3>Email List</h3>
+      <h3 style={styles.subHeading}>Email List</h3>
       {emailList.length > 0 ? (
-        <ul style={{ padding: 0, listStyle: "none" }}>
+        <ul style={styles.list}>
           {emailList.map((email, index) => (
-            <li
-              key={index}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                margin: "5px 0",
-                padding: "10px",
-                border: "1px solid #ccc",
-                borderRadius: "5px",
-                backgroundColor: "#f9f9f9",
-              }}
-            >
+            <li key={index} style={styles.listItem}>
               <span>{email}</span>
               <button
+                style={styles.buttonDanger}
                 onClick={() => handleDeleteEmail(email)}
-                style={{
-                  padding: "5px 10px",
-                  border: "none",
-                  backgroundColor: "#FF4D4D",
-                  color: "#fff",
-                  borderRadius: "5px",
-                  cursor: "pointer",
-                }}
               >
                 Delete
               </button>
@@ -224,60 +187,120 @@ const NewGroup = () => {
       ) : (
         <p>No emails added yet.</p>
       )}
-      <button
-        onClick={handleConfirmGroup}
-        style={{
-          marginTop: "20px",
-          padding: "10px 20px",
-          border: "none",
-          backgroundColor: "#28A745",
-          color: "#fff",
-          borderRadius: "5px",
-          cursor: "pointer",
-        }}
-      >
+
+      <button style={styles.buttonPrimary} onClick={handleConfirmGroup}>
         Confirm Your Group
       </button>
 
-      <h3>Your Groups</h3>
+      <h3 style={styles.subHeading}>Your Groups</h3>
       {groups.length > 0 ? (
-        <ul style={{ padding: 0, listStyle: "none" }}>
+        <ul style={styles.list}>
           {groups.map((group, index) => (
-            <li
-              key={index}
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                margin: "5px 0",
-                padding: "10px",
-                border: "1px solid #ccc",
-                borderRadius: "5px",
-                backgroundColor: "#f0f0f0",
-              }}
-            >
+            <li key={index} style={styles.listItem}>
               <span>{group.groupName}</span>
-              <button
-                onClick={() => handleDeleteGroup(group.groupName)}
-                style={{
-                  padding: "5px 10px",
-                  border: "none",
-                  backgroundColor: "#FF4D4D",
-                  color: "#fff",
-                  borderRadius: "5px",
-                  cursor: "pointer",
-                }}
-              >
-                Delete
-              </button>
+              <div>
+                <button
+                  style={styles.buttonWarning}
+                  onClick={() => handleUpdateGroup(group.groupName)}
+                >
+                  Update
+                </button>
+                <button
+                  style={styles.buttonDanger}
+                  onClick={() => handleDeleteGroup(group.groupName)}
+                >
+                  Delete
+                </button>
+              </div>
             </li>
           ))}
         </ul>
       ) : (
-        <p>No groups available.</p>
+        <p>No groups found.</p>
       )}
     </div>
   );
+};
+
+const styles = {
+  container: {
+    padding: "20px",
+    fontFamily: "Arial, sans-serif",
+    maxWidth: "600px",
+    margin: "auto",
+  },
+  heading: {
+    textAlign: "center",
+    color: "#333",
+    marginBottom: "20px",
+  },
+  subHeading: {
+    marginTop: "30px",
+    color: "#555",
+  },
+  inputGroup: {
+    marginBottom: "20px",
+    display: "flex",
+    alignItems: "center",
+  },
+  label: {
+    marginRight: "10px",
+    fontSize: "16px",
+  },
+  input: {
+    padding: "10px",
+    border: "1px solid #ccc",
+    borderRadius: "5px",
+    width: "70%",
+  },
+  list: {
+    listStyle: "none",
+    padding: "0",
+  },
+  listItem: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: "10px",
+    border: "1px solid #ccc",
+    borderRadius: "5px",
+    backgroundColor: "#f9f9f9",
+    marginBottom: "10px",
+  },
+  buttonPrimary: {
+    padding: "10px 20px",
+    backgroundColor: "#007BFF",
+    color: "#fff",
+    border: "none",
+    borderRadius: "5px",
+    cursor: "pointer",
+  },
+  buttonSecondary: {
+    padding: "10px",
+    backgroundColor: "#28A745",
+    color: "#fff",
+    border: "none",
+    borderRadius: "5px",
+    cursor: "pointer",
+    marginLeft: "10px",
+  },
+  buttonWarning: {
+    padding: "5px 10px",
+    backgroundColor: "#FFC107",
+    color: "#fff",
+    border: "none",
+    borderRadius: "5px",
+    cursor: "pointer",
+    marginRight: "10px",
+  },
+  buttonDanger: {
+    padding: "5px 10px",
+    backgroundColor: "#FF4D4D",
+    color: "#fff",
+    border: "none",
+    borderRadius: "5px",
+    cursor: "pointer",
+  },
 };
 
 export default NewGroup;

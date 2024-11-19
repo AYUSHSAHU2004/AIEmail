@@ -5,6 +5,7 @@ import { auth } from './firebase/firebase';
 import Home from './Home';
 import NewGroup from './Pages/NewGroup/NewGroup';
 import axios from 'axios';
+import UpdateGroup from './Pages/UpdateGroup/UpdateGroup';
 import Login from './Pages/Login/Login';
 import SignUp from './Pages/SignUp/SignUp';
 
@@ -59,6 +60,10 @@ const App = () => {
         <Route
           path="/NewGroup"
           element=<NewGroup/>
+        />
+        <Route
+          path="/UpdateGroup/:groupName"
+          element=<UpdateGroup/>
         />
       </Routes>
     </Router>
