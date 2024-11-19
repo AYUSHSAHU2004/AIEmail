@@ -3,12 +3,41 @@ import React, { useState, useEffect } from "react";
 const NewGroup = () => {
   const [groupName, setGroupName] = useState("");
   const [email, setEmail] = useState("");
+  const [groups, setGroups] = useState([]);
   const [emailList, setEmailList] = useState([]);
 
   // Load emails from localStorage on component mount
   useEffect(() => {
     const storedEmails = JSON.parse(localStorage.getItem("arr")) || [];
     setEmailList(storedEmails);
+  }, []);
+
+  useEffect(() => {
+    const fetchGroups = async () => {
+      const userEmail = localStorage.getItem("user");
+      if (!userEmail) {
+        alert("User email is missing in localStorage!");
+        return;
+      }
+
+      try {
+        const response = await fetch(`http://localhost:3020/getGroup/${userEmail}`);
+        if (!response.ok) {
+          console.log("No group found or an error occurred");
+          setGroups([]); // Ensure groups state is cleared if an error occurs
+          return;
+        }
+        const storedGroups = await response.json();
+        if (storedGroups) {
+          console.log(storedGroups.data);
+          setGroups(storedGroups.data);
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    fetchGroups();
   }, []);
 
   // Function to add email to localStorage
@@ -68,12 +97,43 @@ const NewGroup = () => {
 
       if (response.ok) {
         alert("Group created successfully!");
+        setGroupName(""); // Clear group name input
+        setEmailList([]); // Clear email list
+        localStorage.removeItem("arr"); // Clear localStorage for emails
+        const updatedGroups = await response.json();
+        setGroups(updatedGroups); // Update groups after successful creation
       } else {
         const errorData = await response.json();
         alert(errorData.error);
       }
     } catch (error) {
       alert(`Error: ${error.message}`);
+    }
+  };
+
+  // Function to delete a group
+  const handleDeleteGroup = async (groupToDelete) => {
+    const userEmail = localStorage.getItem("user");
+    if (!userEmail) {
+      alert("User email is missing in localStorage!");
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `http://localhost:3020/deleteGroup/${userEmail}/${groupToDelete}`,
+        { method: "DELETE" }
+      );
+
+      if (response.ok) {
+        alert(`Group "${groupToDelete}" deleted successfully.`);
+        setGroups(groups.filter((group) => group.groupName !== groupToDelete));
+      } else {
+        const errorData = await response.json();
+        alert(errorData.error || "Failed to delete the group.");
+      }
+    } catch (err) {
+      alert(`Error: ${err.message}`);
     }
   };
 
@@ -164,7 +224,6 @@ const NewGroup = () => {
       ) : (
         <p>No emails added yet.</p>
       )}
-
       <button
         onClick={handleConfirmGroup}
         style={{
@@ -179,6 +238,44 @@ const NewGroup = () => {
       >
         Confirm Your Group
       </button>
+
+      <h3>Your Groups</h3>
+      {groups.length > 0 ? (
+        <ul style={{ padding: 0, listStyle: "none" }}>
+          {groups.map((group, index) => (
+            <li
+              key={index}
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                margin: "5px 0",
+                padding: "10px",
+                border: "1px solid #ccc",
+                borderRadius: "5px",
+                backgroundColor: "#f0f0f0",
+              }}
+            >
+              <span>{group.groupName}</span>
+              <button
+                onClick={() => handleDeleteGroup(group.groupName)}
+                style={{
+                  padding: "5px 10px",
+                  border: "none",
+                  backgroundColor: "#FF4D4D",
+                  color: "#fff",
+                  borderRadius: "5px",
+                  cursor: "pointer",
+                }}
+              >
+                Delete
+              </button>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p>No groups available.</p>
+      )}
     </div>
   );
 };
