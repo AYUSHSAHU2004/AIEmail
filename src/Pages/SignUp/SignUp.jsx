@@ -14,7 +14,7 @@ const SignUp = () => {
     setSuccess('');
 
     try {
-      const response = await axios.post('http://localhost:3020/createUser', {
+      const response = await axios.post('https://aiemailback-3.onrender.com/createUser', {
         email,
         pass: password,
       });

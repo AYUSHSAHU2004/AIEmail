@@ -20,7 +20,7 @@ const UpdateGroup = () => {
 
     const fetchGroupDetails = async () => {
       try {
-        const response = await fetch(`http://localhost:3020/getEmail/${storedEmail}/${groupName}`);
+        const response = await fetch(`https://aiemailback-3.onrender.com/getEmail/${storedEmail}/${groupName}`);
         if (!response.ok) {
           alert('Failed to fetch group details');
           return;
@@ -63,7 +63,7 @@ const UpdateGroup = () => {
     }
 
     try {
-      const response = await fetch(`http://localhost:3020/updateGroup/${userEmail}/${groupName}`, {
+      const response = await fetch(`https://aiemailback-3.onrender.com/updateGroup/${userEmail}/${groupName}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

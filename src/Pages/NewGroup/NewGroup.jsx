@@ -23,7 +23,7 @@ const NewGroup = () => {
       }
 
       try {
-        const response = await fetch(`http://localhost:3020/getGroup/${userEmail}`);
+        const response = await fetch(`https://aiemailback-3.onrender.com/getGroup/${userEmail}`);
         if (!response.ok) {
           console.log("No group found or an error occurred");
           setGroups([]); // Ensure groups state is cleared if an error occurs
@@ -85,7 +85,7 @@ const NewGroup = () => {
     };
 
     try {
-      const response = await fetch("http://localhost:3020/createGroup", {
+      const response = await fetch("https://aiemailback-3.onrender.com/createGroup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -117,7 +117,7 @@ const NewGroup = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:3020/deleteGroup/${userEmail}/${groupToDelete}`,
+        `https://aiemailback-3.onrender.com/deleteGroup/${userEmail}/${groupToDelete}`,
         { method: "DELETE" }
       );
 

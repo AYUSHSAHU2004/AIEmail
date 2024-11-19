@@ -38,7 +38,7 @@ const Home = () => {
             }
             
             // Send a GET request to fetch the user's details based on the email
-            const response = await axios.get(`http://localhost:3020/checkUser/${storedEmail}`);
+            const response = await axios.get(`https://aiemailback-3.onrender.com/checkUser/${storedEmail}`);
     
             // Destructure the email and password from the response
             const { email, password } = response.data.data;
@@ -79,7 +79,7 @@ const Home = () => {
             
             // Send emails to all recipients
             const promises = recipients.map((recipient) => {
-                return axios.post('http://localhost:3020/api/email', {
+                return axios.post('https://aiemailback-3.onrender.com/api/email', {
                     ...emailData,
                     to: recipient
                 });
